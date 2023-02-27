@@ -1,0 +1,6 @@
+FROM golang:alpine
+RUN mkdir /app
+COPY . /app
+WORKDIR /app
+RUN go build -o simple-http-server . 
+CMD ["/app/simple-http-server", "--db", "postgresql://postgres:password@host.docker.internal/postgres?sslmode=disable"]
