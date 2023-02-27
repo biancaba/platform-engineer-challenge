@@ -1,0 +1,86 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pgsql-db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pgsql-db
+  template:
+    metadata:
+      labels:
+        app: pgsql-db
+    spec:
+      containers:
+        - name: pgsql-db
+          image: postgres
+          env:
+            - name: POSTGRES_USER
+              value: postgres
+            - name: POSTGRES_PASSWORD
+              value: root
+            - name: POSTGRES_DB
+              value: postgres
+          ports:
+            - containerPort: 5432
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: server
+  template:
+    metadata:
+      labels:
+        app: server
+    spec:
+      containers:
+        - name: server
+          image: biancaba/go-http
+          env:
+            - name: LISTEN
+              value: 0.0.0.0:8080
+            - name: DB_HOST
+              value: pgsql-db
+            - name: DB_PORT
+              value: "5432"
+            - name: DB_USER
+              value: postgres
+            - name: DB_DBNAME
+              value: postgres
+            - name: DB_PASSWORD
+              value: root
+            - name: DB_SSL
+              value: disable
+          ports:
+            - containerPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pgsql-db
+  labels:
+    app: pgsql-db
+spec:
+  clusterIP: 10.103.10.96
+  clusterIPs:
+  - 10.103.10.96
+  internalTrafficPolicy: Cluster
+  ipFamilies:
+  - IPv4
+  ipFamilyPolicy: SingleStack
+  ports:
+  - port: 5432
+    protocol: TCP
+    targetPort: 5432
+  selector:
+    app: pgsql-db
+  sessionAffinity: None
+  type: ClusterIP
+status:
+  loadBalancer: {}
