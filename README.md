@@ -24,7 +24,7 @@ docker build -f Dockerfile.dev -t go-http .
 docker run -d -p 8080:8080 --name go-gttp-container go-http
 ```
 
-## Running the service in Kubernetes
+## Running the service in Kubernetes (Minikube)
 
 ### Using kubectl
 
